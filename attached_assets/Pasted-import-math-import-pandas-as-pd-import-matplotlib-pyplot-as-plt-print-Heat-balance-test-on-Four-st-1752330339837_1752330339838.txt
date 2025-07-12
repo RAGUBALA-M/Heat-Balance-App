@@ -1,0 +1,128 @@
+import math
+import pandas as pd
+import matplotlib.pyplot as plt
+print ("Heat balance test on Four stroke diesel engine with electrical loading")
+'''In the next line of code i am going to include the basic parameters for the heat balance calculation'''
+Cv=42886 #kj/kg
+Density=832 #kg/s
+C_Water=4.186 #kj/kg
+A_orifice=(math.pi/4)*(2.54*10**-2)**2 #m2
+D_orifice=2.54*10**-2 #m
+Density_water=1000 #kg/m
+V=220 #Volt
+Speed=1500 #rpm
+FC_volume=25*10**-6 #m3
+Atm_P=1.013*10**5 #Pa
+R=287 #J/kg
+C_gas=1.005 #kj/kg
+#Next input readings of heat balance test
+n=int(input("Number of Readings:"))
+Input_list=[]
+for i in range (0,n):
+  print("Reading number:",i+1)
+  list=[]
+  Load=int(input("Load (Amp):"))
+  TT_FC=float(input("Time Taken for 25cc fuel consumption (s):"))
+  In_Water_Temp=int(input("Input Water Temperature (celcius):"))
+  Out_water_temp=int(input("Output Water Temperature (Celcius):"))
+  Rise_water_temp=Out_water_temp-In_Water_Temp
+  m_water=float(input("Water collection in 30seconds (kg):"))
+  In_gas_Temp=int(input("Input Gas Tenperature (Celcius):"))
+  Out_gas_Temp=int(input("Output Gas Temperature (Celcius):"))
+  Rise_gas_temp=Out_gas_Temp-In_gas_Temp
+  Mano_Readi_high=float(input("Manometer Reading High (cm):"))
+  Mano_Readi_low=float(input("Manometer Reading Low (cm):"))
+  Mano_Reading=Mano_Readi_high-Mano_Readi_low
+  #Now we are going to append all the values to the list
+  list.append(i+1)
+  list.append(Load)
+  list.append(V)
+  list.append(Speed)
+  list.append(TT_FC)
+  list.append(In_Water_Temp)
+  list.append(Out_water_temp)
+  list.append(Rise_water_temp)
+  list.append(m_water)
+  list.append(In_gas_Temp)
+  list.append(Out_gas_Temp)
+  list.append(Rise_gas_temp)
+  list.append(Mano_Readi_high)
+  list.append(Mano_Readi_low)
+  list.append(Mano_Reading)
+  list.append(D_orifice)
+  Input_list.append(list)
+#Making user to check the input values
+print("Input List")
+Column_names=["S.No","I (Amp)","V(Volts)","Speed(RPM)","Time Taken for 25cc fuel consumption (s)","Input Water Temp (C)","Output Water Temp (C)","Rise in Water Temperature (C)","Water collection in 30seconds (kg)","Input Gas Temperature (C)","Output Gas Temperature (C)","Rise in Gas Temperature (C)","h1(cm)","h2(cm)","Difference (h1-h2)","Diameter of Orifice (m)"]
+pd.set_option('display.max_columns', None)
+df = pd.DataFrame(Input_list, columns=Column_names)
+print(df)
+print("Recheck the input values")
+int(input("If right,Press 1 to continue:"))
+#Calculations to provide data sheet
+Output_list=[]
+if(1):
+  for i in range(n):
+    list_2=[]
+    Mass_flow_fuel=Qin=(FC_volume/Input_list[i][4])
+    Qin=(FC_volume/Input_list[i][4])*Density*3600*Cv #KJ/hr
+    Density_air=(Atm_P)/(R*(273+Input_list[i][9]))
+    Vol_flow_rate=math.sqrt((2*9.81*1000*(Input_list[i][14]*10**-2))/Density_air)*A_orifice #m3/s
+    Mass_flow_rate=Vol_flow_rate*Density_air*3600 #kg/s
+    Qex=(Mass_flow_rate+Mass_flow_fuel)*C_gas*Input_list[i][11] #KJ/hr
+    Qex_per=(Qex*100)/Qin
+    BP_W=V*Input_list[i][1]*(10**-3)
+    BP=V*Input_list[i][1]*3600*(10**-3) #KJ/hr
+    BP_per=(BP*100)/Qin
+    Qcw=((Input_list[i][8]/30)*3600*C_Water*Input_list[i][7]) #KJ/hr
+    Qcw_per=(Qcw*100)/Qin
+    Unacc_loss=Qin-Qex-BP-Qcw
+    Unacc_loss_per=(Unacc_loss*100)/Qin
+    list_2.append(i+1)
+    list_2.append(round(BP_W,2))
+    list_2.append(round(Qin,2))
+    list_2.append(round(BP,2))
+    list_2.append(round(BP_per,2))
+    list_2.append(round(BP_per,2))
+    list_2.append(round(Qcw,2))
+    list_2.append(round(Qcw_per,2))
+    list_2.append(Qcw_per+BP_per)
+    list_2.append(round(Qex,2))
+    list_2.append(round(Qex_per,2))
+    list_2.append(Qex_per+Qcw_per+BP_per)
+    list_2.append(round(Unacc_loss,2))
+    list_2.append(round(Unacc_loss_per,2))
+    list_2.append(Unacc_loss_per+Qex_per+Qcw_per+BP_per)  
+    Output_list.append(list_2)
+
+print("Heat Balance Data Sheet on hour basis")
+Column_names_2=["S.No","BP (W)","Qin (KJ/hr)","BP (KJ/hr)","BP (%)","BP (Cumulative %)","Qcw (KJ/hr)","Qcw (%)","Qcw (Cumulative %)","Qex (KJ/hr)","Qex (%)","Qex (Cumulative %)","Unacc. Loss (KJ/hr)","Unacc. Loss (%)",
+"Unacc. Loss (Cumulative %)"]
+pd.set_option('display.max_columns', None)
+df_2 = pd.DataFrame(Output_list, columns=Column_names_2)
+print(df_2)
+df.to_csv('Heat Balance Data Sheet.csv', index=False)
+df_2.to_csv('Heat Balance Data Sheet on hour basis.csv', index=False)
+#Plotting the graph
+x=[]
+y1=[]
+y2=[]
+y3=[]
+y4=[]
+for i in range(len(Output_list)):
+  x.append(Output_list[i][1])
+  y1.append(Output_list[i][5])
+  y2.append(Output_list[i][8])
+  y3.append(Output_list[i][11])
+  y4.append(Output_list[i][14])
+plt.plot(x, y1, label='BP (Cumulative %)')
+plt.plot(x, y2, label='Qcw (Cumulative %)')
+plt.plot(x, y3, label='Qex (Cumulative %)')
+plt.plot(x, y4, label='Unacc. Loss (Cumulative %)')
+plt.title('Heat Balance Graph')
+plt.xlabel('BP (kW)')
+plt.ylabel('Percentage')
+plt.legend()
+plt.grid(True)
+plt.show()
+'''This code is written by RAGUBALA M on 12/07/2025'''
