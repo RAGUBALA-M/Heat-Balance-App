@@ -7,7 +7,7 @@ hidden = [".pythonlibs", ".streamlit"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["cairo", "ffmpeg-full", "freetype", "ghostscript", "glibcLocales", "gobject-introspection", "gtk3", "pkg-config", "qhull", "tcl", "tk"]
+packages = ["cairo", "ffmpeg-full", "freetype", "ghostscript", "glibcLocales", "gobject-introspection", "gtk3", "inshellisense", "pkg-config", "qhull", "tcl", "tk"]
 
 [deployment]
 run = ["streamlit", "run", "--server.enableCORS=false", "--server.enableWebsocketCompression=false", "--server.runOnSave=false", "main.py"]
